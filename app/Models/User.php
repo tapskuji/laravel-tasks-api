@@ -78,4 +78,9 @@ class User extends Authenticatable
     {
         return $value ? Carbon::parse($value)->format('Y-m-d H:i:s') : null;
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }
