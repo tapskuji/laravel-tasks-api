@@ -35,7 +35,7 @@ class UserControllerTest extends TestCase
         $this->assertSame($expected, $actual);
     }
 
-    public function test_authenticated_user_can_change_their_data()
+    public function test_authenticated_user_can_update_their_data()
     {
         $originalUserInfo = [
             'name' => 'Test',
@@ -52,7 +52,7 @@ class UserControllerTest extends TestCase
             'password_confirmation' => 'newpassword',
         ];
 
-        $response = $this->actingAs($user)->postJson(route('users.update'), $updateData);
+        $response = $this->actingAs($user)->putJson(route('users.update'), $updateData);
 
         $content =  $response->getContent();
         $jsonData = json_decode($content);
