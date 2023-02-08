@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\RegisterController;
+use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +22,14 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->group(function () {
     //Route::apiResource('/users', UserController::class)->only(['index']);
     Route::get('/users', [UserController::class, 'index'])->name('users.read');
-    Route::post('/users', [UserController::class, 'update'])->name('users.update');
+    Route::put('/users', [UserController::class, 'update'])->name('users.update');
+
+
+    Route::get('/tasks', [TaskController::class, 'index'])->name('tasks.list');
+    Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.read');
+    Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
+    Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
+    Route::delete('/tasks/{task}', [TaskController::class, 'delete'])->name('tasks.delete');
 });
 
 Route::post('/login', LoginController::class)->name('users.login');
