@@ -73,6 +73,7 @@ class TaskControllerTest extends TestCase
 
         $response = $this->actingAs($user)->postJson(route('tasks.store'), $taskData);
         $response->assertCreated();
+        $this->assertEquals($user->id, Task::find(1)->user_id);
         $response->assertJson([
             'data' => [
                 'id' => 1,
@@ -108,6 +109,23 @@ class TaskControllerTest extends TestCase
         ]);
     }
 
+    public function test_user_cannot_update_a_task_that_does_not_belong_to_them()
+    {
+        $user1 = User::factory()->hasTasks(2)->create();
+        $user2 = User::factory()->hasTasks(2)->create();
+        $tasks = $user2->tasks;
+        $taskData = [
+            'title' => fake()->sentence(3),
+            'description' => fake()->sentence(10),
+            'completed' => fake()->randomElement([Task::INCOMPLETE_TASK, Task::COMPLETED_TASK]),
+            'dueDate' => fake()->dateTimeBetween('+2 days', '+1 month')->format('Y-m-d H:i:s'),
+        ];
+
+        $response = $this->actingAs($user1)->putJson(route('tasks.update', $tasks[1]->id), $taskData);
+        $response->assertForbidden();
+        $this->assertSame($tasks[1]->title, Task::find($tasks[1]->id)->title);
+    }
+
     public function test_user_can_delete_a_task()
     {
         $user = User::factory()->hasTasks(2)->create();
@@ -115,6 +133,18 @@ class TaskControllerTest extends TestCase
         $response = $this->actingAs($user)->deleteJson(route('tasks.delete', $tasks[1]->id));
         $response->assertOk();
         $this->assertCount(1, Task::all());
+    }
+
+    public function test_user_cannot_delete_a_task_that_does_not_belong_to_them()
+    {
+        $user1 = User::factory()->hasTasks(2)->create();
+        $user2 = User::factory()->hasTasks(2)->create();
+        $tasks = $user2->tasks;
+
+        $response = $this->actingAs($user1)->deleteJson(route('tasks.delete', $tasks[1]->id));
+
+        $response->assertForbidden();
+        $this->assertCount(4, Task::all());
     }
 
     public function test_tasks_should_be_ordered_by_updated_at()
