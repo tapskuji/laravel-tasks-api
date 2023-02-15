@@ -5,14 +5,18 @@ namespace Tests\Feature;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class TaskControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    // test crud, test structure
+    protected function setUp(): void
+    {
+        parent::setUp();
+        //todo
+    }
+
     public function test_user_can_only_read_all_their_tasks()
     {
         $user = User::factory()->hasTasks(2)->create();
@@ -165,5 +169,78 @@ class TaskControllerTest extends TestCase
                 ]
             ]
         ]);
+    }
+
+    public function test_user_can_filter_tasks()
+    {
+        $user = $this->createUserWithTasks();
+
+        $url = '/api/tasks?search=physics&sort=completed&direction=asc';
+        $response = $this->actingAs($user)->getJson($url);
+
+        $content = $response->getContent();
+        $content = json_decode($content, true);
+
+        $response->assertOk();
+        $response->assertJsonCount(2, 'data');
+        $response->assertSee('Physics');
+        $response->assertSee('physics');
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => ['id', 'title', 'description', 'completed', 'dueDate', 'createdAt', 'updatedAt']
+            ]
+        ]);
+
+        $response->assertJson([
+            'data' => [
+                [
+                    'id' => 1,
+                ],
+                [
+                    'id' => 3,
+                ]
+            ]
+        ]);
+    }
+
+    public function createUserWithTasks(): User
+    {
+        $user = User::factory()->create();
+
+        $task0 = new Task();
+        $task0->id = 1;
+        $task0->user_id = $user->id;
+        $task0->title = 'Study Physics';
+        $task0->description = 'Study chapter 1';
+        $task0->completed = 0;
+        $task0->due_date = null;
+        $task0->created_at = '2022-01-01 08:00:00';
+        $task0->updated_at = '2022-01-01 08:00:00';
+        $task0->save();
+
+
+        $task1 = new Task();
+        $task1->id = 2;
+        $task1->user_id = $user->id;
+        $task1->title = 'Math Assignment';
+        $task1->description = 'Study chapter 2';
+        $task1->completed = 0;
+        $task1->due_date = null;
+        $task1->created_at = '2022-02-01 08:00:00';
+        $task1->updated_at = '2022-02-01 08:00:00';
+        $task1->save();
+
+        $task2 = new Task();
+        $task2->id = 3;
+        $task2->user_id = $user->id;
+        $task2->title = 'Exam';
+        $task2->description = 'Study for physics exam';
+        $task2->completed = 1;
+        $task2->due_date = '2022-03-01 08:00:00';
+        $task2->created_at = '2022-03-01 08:00:00';
+        $task2->updated_at = '2022-03-01 08:00:00';
+        $task2->save();
+
+        return $user;
     }
 }

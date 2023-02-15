@@ -70,4 +70,22 @@ class Task extends Model
     {
         static::addGlobalScope(new MostRecentScope());
     }
+
+    public function scopeFilter($query, array $array)
+    {
+        $filter = $array['search'] ?? null;
+        $sortBy = $array['sort'] ?? null;
+        $direction = $array['direction'] ?? 'desc';
+
+        $query->when($filter, function ($query) use ($filter) {
+            $query->where('title', 'LIKE', '%' . $filter . '%')
+                ->orWhere('description', 'LIKE', '%' . $filter . '%');
+        });
+
+        $query->when($sortBy, function ($query) use ($sortBy, $direction) {
+            $query->orderBy($sortBy, $direction);
+        });
+
+        return $query;
+    }
 }

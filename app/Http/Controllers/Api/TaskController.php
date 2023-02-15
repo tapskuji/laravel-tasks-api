@@ -3,21 +3,26 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GetTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\TaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Http\Resources\TaskCollection;
 use App\Http\Resources\TaskResource;
 use App\Models\Task;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Services\TaskQueryFilter;
 use Illuminate\Http\Response;
 
 class TaskController extends Controller
 {
-    public function index(Request $request)
+    public function index(GetTaskRequest $request, TaskQueryFilter $filter)
     {
-        return new TaskCollection($request->user()->tasks);
+        $validated = $request->validated();
+        $filters = $filter->transform($validated);
+        $tasks = Task::where('user_id', $request->user()->id)
+            ->filter($filters)
+            ->get();
+        return new TaskCollection($tasks);
     }
 
     public function show(Task $task, TaskRequest $request)
