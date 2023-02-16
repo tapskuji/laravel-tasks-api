@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Task;
 use App\Models\User;
+use App\Services\CacheKeyService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class TaskControllerTest extends TestCase
@@ -201,6 +203,23 @@ class TaskControllerTest extends TestCase
                 ]
             ]
         ]);
+    }
+
+    public function test_user_tasks_are_cached_forever()
+    {
+        $cacheRepository = Cache::driver();
+        $cacheRepositorySpy = \Mockery::spy($cacheRepository);
+        Cache::swap($cacheRepositorySpy);
+
+        $user = User::factory()->hasTasks(2)->create();
+        $tasks = $user->tasks;
+        $cacheKey = CacheKeyService::generateKey($user->id);
+
+        $response = $this->actingAs($user)->getJson(route('tasks.list'));
+
+        $cacheRepositorySpy->shouldHaveReceived("rememberForever")
+            ->once()
+            ->with($cacheKey, \Closure::class);
     }
 
     public function createUserWithTasks(): User
