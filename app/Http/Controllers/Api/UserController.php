@@ -23,7 +23,7 @@ class UserController extends Controller
         $validated = $request->validated();
         $user = $request->user();
 
-        if ($validated['password']) {
+        if (array_key_exists('password', $validated)) {
             $validated['password'] = Hash::make($validated['password']);
         }
 
