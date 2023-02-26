@@ -41,7 +41,8 @@ class TaskController extends Controller
 
     public function update(Task $task, UpdateTaskRequest $request)
     {
-        $task->update($request->only(['title', 'description', 'completed', 'due_date']));
+        $validated = $request->validated();
+        $task->update($validated);
         Cache::forget(CacheKeyService::generateKey($request->user()->id));
         return new TaskResource($task);
     }

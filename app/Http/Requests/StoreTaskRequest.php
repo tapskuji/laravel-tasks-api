@@ -29,7 +29,7 @@ class StoreTaskRequest extends FormRequest
             'title' => 'required|string',
             'description' => 'sometimes|string',
             'completed' => 'sometimes|bool',
-            'dueDate' => 'sometimes|date_format:Y-m-d H:i:s|after_or_equal:' . date('Y-m-d H:i:s'),
+            'due_date' => 'sometimes|date_format:Y-m-d H:i:s|after_or_equal:' . date('Y-m-d H:i:s'),
         ];
     }
 

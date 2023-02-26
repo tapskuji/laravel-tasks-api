@@ -82,11 +82,32 @@ class TaskControllerTest extends TestCase
         $this->assertEquals($user->id, Task::find(1)->user_id);
         $response->assertJson([
             'data' => [
-                'id' => 1,
+                'id' => '1',
                 'title' => $taskData['title'],
                 'description' => $taskData['description'],
-                'completed' => $taskData['completed'],
+                'completed' => (bool)$taskData['completed'],
                 'dueDate' => $taskData['dueDate'],
+            ]
+        ]);
+    }
+
+    public function test_user_can_create_a_task_with_required_fields_only()
+    {
+        $user = User::factory()->create();
+        $taskData = [
+            'title' => fake()->sentence(3),
+        ];
+
+        $response = $this->actingAs($user)->postJson(route('tasks.store'), $taskData);
+        $response->assertCreated();
+        $this->assertEquals($user->id, Task::find(1)->user_id);
+        $response->assertJson([
+            'data' => [
+                'id' => 1,
+                'title' => $taskData['title'],
+                'description' => null,
+                'completed' => false,
+                'dueDate' => null,
             ]
         ]);
     }

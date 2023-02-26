@@ -11,14 +11,8 @@ class StoreTaskAction
 
     public function createTask(int $userId, array $validated)
     {
-        $task = Task::create([
-            'user_id' => $userId,
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'completed' => $validated['completed'],
-            'due_date' => $validated['dueDate'],
-        ]);
-
+        $validated['user_id'] = $userId;
+        $task = Task::create($validated);
         Cache::forget(CacheKeyService::generateKey($userId));
         return $task;
     }
