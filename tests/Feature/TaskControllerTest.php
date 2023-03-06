@@ -243,6 +243,37 @@ class TaskControllerTest extends TestCase
             ->with($cacheKey, \Closure::class);
     }
 
+    public function test_user_can_use_multiple_filters_to_get_tasks()
+    {
+        $user = $this->createUserWithTasks();
+        $url = '/api/tasks?search=study&completed=0&sort=title&direction=asc';
+        $response = $this->actingAs($user)->getJson($url);
+
+        $response->assertOk();
+        $response->assertJsonCount(3, 'data');
+        $response->assertSee('Study');
+        $response->assertSee('study');
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => ['id', 'title', 'description', 'completed', 'dueDate', 'createdAt', 'updatedAt']
+            ]
+        ]);
+
+        $response->assertJson([
+            'data' => [
+                [
+                    'id' => 2,
+                ],
+                [
+                    'id' => 4,
+                ],
+                [
+                    'id' => 1,
+                ]
+            ]
+        ]);
+    }
+
     public function createUserWithTasks(): User
     {
         $user = User::factory()->create();
@@ -280,6 +311,17 @@ class TaskControllerTest extends TestCase
         $task2->created_at = '2022-03-01 08:00:00';
         $task2->updated_at = '2022-03-01 08:00:00';
         $task2->save();
+
+        $task3 = new Task();
+        $task3->id = 4;
+        $task3->user_id = $user->id;
+        $task3->title = 'More study work';
+        $task3->description = 'Prepare for last exam';
+        $task3->completed = 0;
+        $task3->due_date = '2022-04-01 08:00:00';
+        $task3->created_at = '2022-04-01 08:00:00';
+        $task3->updated_at = '2022-04-01 08:00:00';
+        $task3->save();
 
         return $user;
     }

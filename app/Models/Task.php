@@ -73,13 +73,20 @@ class Task extends Model
 
     public function scopeFilter($query, array $array)
     {
-        $filter = $array['search'] ?? null;
+        $search = $array['search'] ?? null;
+        $completed = $array['completed'] ?? null;
         $sortBy = $array['sort'] ?? null;
         $direction = $array['direction'] ?? 'desc';
 
-        $query->when($filter, function ($query) use ($filter) {
-            $query->where('title', 'LIKE', '%' . $filter . '%')
-                ->orWhere('description', 'LIKE', '%' . $filter . '%');
+        $query->when($search, function ($query) use ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('title', 'LIKE', '%' . $search . '%')
+                    ->orWhere('description', 'LIKE', '%' . $search . '%');
+            });
+        });
+
+        $query->when(!is_null($completed), function ($query) use ($completed) {
+            $query->where('completed', '=', $completed);
         });
 
         $query->when($sortBy, function ($query) use ($sortBy, $direction) {

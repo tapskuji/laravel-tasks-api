@@ -26,6 +26,7 @@ class GetTaskRequest extends FormRequest
     {
         return [
             'search' => 'sometimes|string',
+            'completed' => 'sometimes|boolean',
             'sort' => ['sometimes', Rule::in(['title', 'description', 'completed', 'dueDate', 'createdAt', 'updatedAt'])],
             'direction' => ['sometimes', Rule::in(['asc', 'desc'])],
         ];
