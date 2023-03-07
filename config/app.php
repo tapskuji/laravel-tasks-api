@@ -212,4 +212,8 @@ return [
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
 
+    /*
+     * Rate limit
+     */
+    'rate_limit' => env('RATE_LIMIT_ATTEMPTS', 60),
 ];
